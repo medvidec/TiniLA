@@ -1,0 +1,14 @@
+<DesignStrategy goal="higheffort" strategy="vlastni" version="10.1">
+   <Description><![CDATA[         ]]></Description>
+   <DeviceList devices="xc9500xl" />
+   <Properties>
+      <property name = "Synthesize - XST:Optimization Effort"
+               value = "High" />
+      <property name = "Synthesize - XST:Optimization Goal"
+               value = "Area" />
+      <property name = "Synthesize - XST:Keep Hierarchy"
+               value = "No" />
+      <property name = "Fit:Implementation Template"
+               value = "Optimize Density" />
+   </Properties>
+</DesignStrategy>

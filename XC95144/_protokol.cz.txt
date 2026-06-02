@@ -1,0 +1,154 @@
+Protokol pro TiniLA 
+===================
+
+
+verze 2010-03-07
+================
+
+TiniLA vyuziva POUZE modul FT2232 !
+
+Mapa EPP registru
+-----------------
+
+Adresa          Zapis            Cteni
+  0x0         Ridici registr   Datovy registr
+  0x1         Trigger hodnota  Status registr
+  0x2         Trigger maska    Adresa ve SRAM 8..1
+  0x3         Casova zakladna  Adresa ve SRAM 16..9
+
+Popis registru - zapis
+----------------------
+
+         Ridici registr
+         --------------
+
+D7 - RUN - spusti chytani dat
+D6 - CLR - resetuje TiniLA
+D5 - SRAMCNTR_CLEAR - nuluje SRAM pocitadlo pred ctenim
+D4 - AUTO_INC - nastavi autoinkrement pro cteni a pritom nacte prvni vzorek dat
+D3 - STOP - prerusi chytani dat
+D2 - FALLEDGE - sampluje na sestupnou hranu hodin
+D1-D0 - BYTESEL - tohle je asi zbytecne nastavovat, bude stacit nulovat
+
+         Trigger hodnota
+         ---------------
+
+D6-D0 - uroven triggeru
+
+         Trigger maska
+         -------------
+
+D6-D0 - maska pro trigger - '1' v danem bitu znamena, ze se hodnota kontroluje
+
+
+         Casova zakladna - vcetne povoleni externiho triggeru
+         ---------------
+D7 - uroven pro externi trigger
+D6 - povoleni externiho triggeru - '1'
+D3-D0 - nastaveni casove zakladny
+
+Popis registru - cteni
+----------------------
+         Datovy registr
+         --------------
+
+D7-D0 - data navzorkovana pri casove analyze
+      - prvni jde nejvyssi byte daneho 32-bitoveho slova
+
+         Status registr
+         --------------
+
+D7 - DONE - konec casove analyzy
+D6 - RUN - TiniLA zrovna bezi
+D5 - CLR - TiniLA je v RESETu
+D4 - TRIG - trigger podminka splnena
+D3 - SRAM_A0 - Adresa ve SRAM - bit 0
+D2-D0 - FW_REV - revize firmware - aktualni je "001"
+
+Doporucena sekvence prikazu pro MiniLA
+--------------------------------------
+... bude trochu jina
+
+
+verze puvodni
+=============
+
+TiniLA komunikuje s PC pres EPP port.
+
+Mapa EPP registru
+-----------------
+
+Adresa          Zapis            Cteni
+  0x0         Ridici registr   Datovy registr
+  0x1         Trigger hodnota  Status registr
+  0x2         Trigger maska        - " -
+  0x3         Casova zakladna      - " -
+
+Popis registru - zapis
+----------------------
+
+         Ridici registr
+         --------------
+
+D7 - RUN - spusti chytani dat
+D6 - CLR - resetuje TiniLA
+D5 - volno
+D4 - AUTO_INC - nastavi autoinkrement pro cteni a pritom nacte prvni vzorek dat
+D3 - STOP - prerusi chytani dat
+D2 - FALLEDGE - sampluje na sestupnou hranu hodin
+D1-D0 - BYTESEL - tohle je asi zbytecne nastavovat, bude stacit nulovat
+
+         Trigger hodnota
+         ---------------
+
+D6-D0 - uroven triggeru
+
+         Trigger maska
+         -------------
+
+D6-D0 - maska pro trigger - '1' v danem bitu znamena, ze se hodnota kontroluje
+
+
+         Casova zakladna - vcetne povoleni externiho triggeru
+         ---------------
+D7 - uroven pro externi trigger
+D6 - povoleni externiho triggeru - '1'
+D3-D0 - nastaveni casove zakladny
+
+Popis registru - cteni
+----------------------
+         Datovy registr
+         --------------
+
+D7-D0 - data navzorkovana pri casove analyze
+      - prvni jde nejvyssi byte daneho 32-bitoveho slova
+
+         Status registr
+         --------------
+
+D7 - DONE - konec casove analyzy
+D6 - RUN - TiniLA zrovna bezi
+D5 - CLR - TiniLA je v RESETu
+D4 - TRIG - trigger podminka splnena
+D3 - SAMPLE_TOP - vsechna data z analyzatoru jsou vyctena
+D2-D0 - FW_REV - revize firmware - aktualni je "001"
+
+Doporucena sekvence prikazu pro MiniLA
+--------------------------------------
+CTRL_REG <=  "01000000" -- reset
+CTRL_REG <=  "00000000" -- vypnout reset
+TIMEB_REG <= "00000010" -- nastaveni casove zakladny
+TRVAL_REG <= "01010101" -- nastaveni hodnoty triggeru
+TRMSK_REG <= "00011111" -- nastaveni masky triggeru
+CTRL_REG <=  "01000000" -- reset
+CTRL_REG <=  "10000000" -- spustit casovou analyzu
+
+cekat, az je STATUS_REG(7) = '1'
+
+CTRL_REG <=  "00010000" -- nastaveni autoinkrementu
+precist 4 bajty
+dokud STATUS_REG(3) = '0'
+precist 4 bajty - 0x..FE
+precist 4 bajty - 0x..FF - tohle je chyba firmwaru v CPLD
+
+
