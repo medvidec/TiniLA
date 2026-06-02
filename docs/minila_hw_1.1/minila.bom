@@ -1,0 +1,35 @@
+Qty Value          Device     Parts
+12  4K7            SMD-0805   R119..R130
+2   10u/10V        SMD-B      C9, C10
+49  47R            SMD-0805   R107..R118, R131..R167
+1   47u/10V                   C103
+19  100n           SMD-1206   C1..C8, C102, C104..C113
+4   470R           SMD-0805   R103..R106
+1   470u/16V                  C101
+1   K375A                     CON4
+1   MLW10A                    K1
+2   MLW16A                    K2, K3
+3   MLW16G                    K4, K5, K8
+1   PSH02-06PG                K6
+1   CAN25Z90                  K7
+1   B250C1500                 B1
+4   LED-1206       SMD-1206   D2..D5
+1   AS7C33128PFS32A-166TQC    IC1
+1   XC95288XL-6TQ144          IC2
+1   LD1117DT-3.3              IC3
+1   crystal 100MHz            IC4
+
+miniLA was tested also with this SRAM:
+IS64LF12832A-7
+
+
+If you have problems getting the SRAM, alternative SRAM should comply with following requirements:
+- pin compatibility, 3.3V supply voltage
+- data widht >=32 bits
+- flowthought mode support
+- cycle time < 10ns
+- setup time <= 2ns
+- hold time <= 2ns
+
+
+
