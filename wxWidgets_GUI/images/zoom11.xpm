@@ -1,0 +1,23 @@
+/* XPM */
+static const char * zoom11_xpm[] = {
+"16 16 3 1",
+"   c None",
+".	c Black",
+"X	c Gray100",
+"    ....        ",
+"  ..XXXXX..     ",
+" .XXXXXXXXX.    ",
+" .XXX.X.XXX.    ",
+".XXX..X..XXX.   ",
+".XX...X...XX.   ",
+".X....X....X.   ",
+".XX...X...XX.   ",
+".XXX..X..XXX.   ",
+" .XXX.X.XXX.    ",
+" .XXXXXXXXX.    ",
+"  ..XXXXX..     ",
+"    .... ...    ",
+"          ...   ",
+"           ...  ",
+"            ... "
+};

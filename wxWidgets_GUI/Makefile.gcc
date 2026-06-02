@@ -1,0 +1,119 @@
+################### -*- mode: makefile -*- #####################################
+# Makefile for wxWidgets projects                                              #
+#                                                                              #
+# vaclavpe@seznam.cz                                                           #
+#                                                                              #
+################################################################################
+#
+# if you have SH.EXE from MinSYS in $PATH$ the makefile will
+# not work!!! (if exist error)
+#
+# Change Log
+# 2026-05-27 - WXWIN from system variable, DATE has different format, added UNICODE flags
+# 2010-03-05 - extension for wxWidgets-2.8, added MINOR version,
+#              added generation of builtdate.h to be used in the project
+
+WXVERZ=2.8
+WXVERZMINOR=12
+#WXWIN=D:/wxWidgets-$(WXVERZ).$(WXVERZMINOR)
+WXUNICODEFLAG=u
+
+COMPILEDATE =  %date:~6,4%-%date:~3,2%-%date:~0,2% 
+#COMPILEDATE = `date "+%Y-%m-%d"`
+GCC_VERSION=3
+ifeq ($(GCC_VERSION),2.95)
+GCCFLAGS = -fvtable-thunks
+endif
+CXX=g++.exe
+RESCOMP=windres.exe
+CPPFLAGS= -fno-rtti -fno-pcc-struct-return -fstrict-aliasing -Wall -D__WXMSW__ -D__GNUWIN32__ -D_WINDOWS -D_UNICODE
+CFLAGS= -fno-rtti -fno-pcc-struct-return -fstrict-aliasing -Wall -D__GNUWIN32__ -D_WINDOWS
+WARNINGFLAGS=-Wall
+OPTFLAGS=-O2
+ifeq ($(BUILD),debug)
+WXDEBUGFLAG = d
+DEBUGFLAGS=  -g -D__WXDEBUG__
+OUTPUTPATH=DebugMSW
+OBJECTPATH=DebugMSW
+STRIPCMD=
+CFLAGS += -g
+endif
+
+ifneq ($(BUILD),debug)
+OUTPUTPATH=ReleaseMSW
+OBJECTPATH=ReleaseMSW
+STRIPCMD=strip $@
+endif
+
+LINKERFLAGS=-Wl,--subsystem,windows -mwindows -static-libgcc
+RESPATH=--include-dir "$(WXWIN)/include" --include-dir "$(WXWIN)/contrib/include" --include-dir "$(WXWIN)/lib/gcc_lib/msw$(WXDEBUGFLAG)$(WXUNICODEFLAG)"
+
+ifeq ($(WXVERZ),2.4)
+LIBS=-lwxmsw -lregex -lpng -ljpeg -lzlib -ltiff -lstdc++ -lgcc -lodbc32 -lwsock32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lctl3d32 -lodbc32 -ladvapi32 -lodbc32 -lwsock32 -lopengl32 -lglu32 -lole32 -loleaut32 -luuid  
+CPPINC=-I"$(WXWIN)/include" -I"$(WXWIN)/contrib/include" -I"$(WXWIN)/lib/msw"$(WXDEBUGFLAG)
+LIBPATH=-L"$(WXWIN)/lib"
+endif
+
+ifeq ($(WXVERZ),2.6)
+LIBS=-lwxmsw26$(WXDEBUGFLAG)_xrc -lwxmsw26$(WXDEBUGFLAG)_adv -lwxmsw26$(WXDEBUGFLAG)_html -lwxmsw26$(WXDEBUGFLAG)_core -lwxbase26$(WXDEBUGFLAG) -lwxbase26$(WXDEBUGFLAG)_net -lwxbase26$(WXDEBUGFLAG)_xml -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregex -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
+CPPINC=-I"$(WXWIN)/include" -I"$(WXWIN)/contrib/include" -I"$(WXWIN)/lib/gcc_lib/msw$(WXDEBUGFLAG)"
+LIBPATH=-L"$(WXWIN)/lib/gcc_lib"
+endif
+
+ifeq ($(WXVERZ),2.8)
+LIBS=-lwxmsw28$(WXDEBUGFLAG)$(WXUNICODEFLAG)_xrc -lwxmsw28$(WXDEBUGFLAG)$(WXUNICODEFLAG)_adv -lwxmsw28$(WXDEBUGFLAG)$(WXUNICODEFLAG)_html -lwxmsw28$(WXDEBUGFLAG)$(WXUNICODEFLAG)_core -lwxbase28$(WXDEBUGFLAG)$(WXUNICODEFLAG) -lwxbase28$(WXDEBUGFLAG)$(WXUNICODEFLAG)_net -lwxbase28$(WXDEBUGFLAG)$(WXUNICODEFLAG)_xml -lwxtiff -lwxjpeg -lwxpng -lwxzlib -lwxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG) -lwxexpat -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32
+CPPINC=-I"$(WXWIN)/include" -I"$(WXWIN)/contrib/include" -I"$(WXWIN)/lib/gcc_lib/msw$(WXDEBUGFLAG)$(WXUNICODEFLAG)"
+LIBPATH=-L"$(WXWIN)/lib/gcc_lib"
+endif
+
+RCFILEOBJ=_tiniLA_rc.o
+RCFILESRC=tiniLA.rc
+
+PROGRAM=TiniLA.exe
+
+OBJECTS=$(OBJECTPATH)/AppTiniLA.o $(OBJECTPATH)/FrameMain.o  $(OBJECTPATH)/DlgConfigApp.o $(OBJECTPATH)/WavePanel.o $(OBJECTPATH)/template_tiniLA.o $(OBJECTPATH)/$(RCFILEOBJ) $(OBJECTPATH)/ftd2xx_if.o ftd2xx.lib
+
+all:   $(OBJECTPATH)
+
+$(OBJECTPATH):
+	-if not exist $(OBJECTPATH) mkdir $(OBJECTPATH)
+
+clean:
+	-if exist $(OBJECTPATH)\*.o del $(OBJECTPATH)\*.o
+	-if exist $(OBJECTPATH)\*.res del $(OBJECTPATH)\*.res
+	-if exist $(OUTPUTPATH)\$(PROGRAM) del $(OUTPUTPATH)\$(PROGRAM)
+
+help:
+	@echo "Usage: make -f makefile.gcc CONFIG=[debug|release] [all|clean|help]"
+
+### Targets ####
+
+all:   $(OUTPUTPATH)/$(PROGRAM)
+
+$(OUTPUTPATH)/$(PROGRAM):   $(OBJECTS)
+	$(CXX) -o $@ $(OBJECTS) $(LIBPATH) $(LINKERFLAGS) $(LIBS)
+	$(STRIPCMD)
+
+$(OBJECTPATH)/AppTiniLA.o:   AppTiniLA.cpp
+	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
+
+$(OBJECTPATH)/WavePanel.o:   WavePanel.cpp WavePanel.h
+	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
+
+$(OBJECTPATH)/FrameMain.o:   FrameMain.cpp FrameMain.h
+	echo const wxString datebuilt = _(" $(COMPILEDATE) "); > datebuilt.h
+	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
+
+$(OBJECTPATH)/DlgConfigApp.o:   DlgConfigApp.cpp
+	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
+
+$(OBJECTPATH)/template_tiniLA.o:   template_tiniLA.cpp template_tiniLA.h
+	$(CXX) -c -o $@ $(CPPFLAGS) $(GCCFLAGS) $(DEBUGFLAGS) $(OPTFLAGS) $(WARNINGFLAGS) $(CPPINC) $<
+
+$(OBJECTPATH)/ftd2xx_if.o:      ftd2xx_if.c
+	$(CXX) -c $(CFLAGS) -c $(HEADERS) -o $@ $<
+
+$(OBJECTPATH)/$(RCFILEOBJ):   $(RCFILESRC)
+	$(RESCOMP) --use-temp-file -i$< -o$@ $(RESPATH) --include-dir . --define NOPCH
+
+.PHONY:   all clean datebuilt.h

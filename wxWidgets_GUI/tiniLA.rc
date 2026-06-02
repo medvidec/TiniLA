@@ -1,0 +1,3 @@
+AppIcon ICON "tiniLA.ico"
+#include "wx/msw/wx.rc"
+
