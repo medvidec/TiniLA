@@ -1,5 +1,5 @@
 # TiniLA
-Tiny logic analyzer based on XC95144XL and 128kx32 bit SRAM with USB interface
+Tiny logic analyzer based on XC95144XL and 128kx32 bit SRAM with USB interface. TiniLA name is derived from the bigger brother MiniLA.
 
 ## TiniLA Features
   * 32 channels 

@@ -68,6 +68,9 @@ public:
     
     void SetData( int d) { m_cursorData = d; }
     void SetSampleCount( int d) { m_sampleCount = d; }
+    
+    wxString GetSignalName( int i) { return m_signalNames[i]; }
+    void SetSignalName( int i, wxString n) { m_signalNames[i] = n; }
 
 protected:
 

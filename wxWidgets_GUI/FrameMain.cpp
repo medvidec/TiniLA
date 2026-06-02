@@ -323,7 +323,6 @@ void FrameMain::OnFileOpen( wxCommandEvent& event )
    int samplingfreqfromfile = 0;
    wxString str;
 
-   arr.Empty();
 
    wxFileDialog dlg(this, _T("Choose a file"), _T(""), _T(""), _T("*.ols"), wxFD_OPEN , wxDefaultPosition, wxDefaultSize, _T("filedlg"));
 
@@ -332,8 +331,9 @@ void FrameMain::OnFileOpen( wxCommandEvent& event )
       fname = dlg.GetPath();
       if( true == filedat.Open( fname)) {
          // successfully opened file - get the header; it begins with ";"
-         unsigned long samplecntr = 0; // samples from zero
+         unsigned long samplecntr = 0xfffffff;
          unsigned long lastsample = 0;
+         arr.Empty();
          for ( str = filedat.GetFirstLine(); !filedat.Eof(); str = filedat.GetNextLine() )
          {
              // try to parse the line
@@ -347,6 +347,15 @@ void FrameMain::OnFileOpen( wxCommandEvent& event )
                 }
                 if ( 0 == str.Find(_T(";Channels:"))) {
                   // we assume 32 channels, so no action here yet
+                }
+                if (( 0 == str.Find(_T(";Channel "))) && (_T("name:")==str.Mid(12,5))) { // find channel names
+                  unsigned long t1; str.Mid(9,2).ToULong(&t1, 10);
+                  if ((t1 >= 0) && (t1 < 33)) {
+                     wxLogMessage ( _T("File open: channel number: ") + str.Mid(9,2) + _(" renamed to ") + str.Mid(18));
+                     m_signalPanel->SetSignalName( (int)t1, str.Mid(18));
+                  } else {
+                     wxLogMessage ( _T("File open: wrong channel number: ") + str.Mid(9,2));
+                  }
                 }
              } else {
                 int atpos;
@@ -362,7 +371,7 @@ void FrameMain::OnFileOpen( wxCommandEvent& event )
                           }
                           arr.Add((unsigned int)actsample);
                           lastsample = actsample;
-                          samplecntr++;
+                          samplecntr = actcntr+1;
                        }
            			 } else {
                       wxString bla; bla.Printf(_("%d"), filedat.GetCurrentLine());
@@ -399,20 +408,34 @@ void FrameMain::OnFileSave( wxCommandEvent& event )
    wxString fname;
    wxFFile filedat;
    unsigned int icnt;
-
+   unsigned int lastSample = 0xdeadbeef;
+   
    wxFileDialog dlg(this, _T("Choose a file"), _T(""), _T(""), _T("*.ols"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT , wxDefaultPosition, wxDefaultSize, _T("filedlg"));
 
    if( wxID_OK == dlg.ShowModal()) {
      fname = dlg.GetPath();
      if( true == filedat.Open( fname, _T("w"))) {
 	    // ok, now store the header
-		fname.Printf(wxT(";Rate:%d\n"), m_samplingfreq);
+		fname.Printf(wxT(";Rate: %d\n"), m_samplingfreq);
 		filedat.Write(fname); // store sample rate
-		filedat.Write(wxT(";Channels:32\n")); // store number of channels
+		filedat.Write(wxT(";Channels: 32\n")); // store number of channels
+      filedat.Write(wxT(";Compressed: true\n")); // store number of channels
+      // store the channel names if they differ from default
+      for ( icnt = 0; icnt < 32; icnt++) {
+         wxString chname; chname.Printf(_T("Channel %02d"), icnt);
+         if (chname != m_signalPanel->GetSignalName( icnt)) {
+            wxString bla; bla.Printf(_T(";Channel %02d name: "), icnt);
+            filedat.Write(bla + m_signalPanel->GetSignalName( icnt)+ _T("\n"));
+         }
+      }
+
 		// store the main data - format is <sample value>@<sample number> [HEX,DEC]
 		for ( icnt = 0; icnt < m_samples.GetCount(); icnt++) {
-		   fname.Printf(wxT("%08x@%d\n"), m_samples.Item(icnt), icnt+1);
-		   filedat.Write(fname);
+         if ((lastSample != m_samples.Item(icnt)) || (icnt == 0) || (icnt == m_samples.GetCount()-1)) { // adding compression
+            fname.Printf(wxT("%08x@%d\n"), m_samples.Item(icnt), icnt); // samples start with 0
+            filedat.Write(fname);
+            lastSample = m_samples.Item(icnt);
+         }
 		}
 		filedat.Close();
 	 } else {
